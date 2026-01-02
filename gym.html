@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IronPulse Fitness</title>
+    
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Config for Custom Animations & Fonts -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'fade-in-up': 'fadeInUp 0.7s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Import Map for React and Lucide Icons -->
+    <script type="importmap">
+        {
+            "imports": {
+                "react": "https://esm.sh/react@18.2.0",
+                "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+                "lucide-react": "https://esm.sh/lucide-react@0.263.1"
+            }
+        }
+    </script>
+
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* Custom Utilities not covered by Tailwind config */
+        .text-stroke-white {
+            -webkit-text-stroke: 1px white;
+            color: transparent;
+        }
+        body {
+            background-color: #0a0a0a; /* neutral-950 */
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- React Application Code -->
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { 
+            Menu, X, Dumbbell, Calendar, 
+            MapPin, Phone, Mail, ChevronRight, 
+            Flame, Clock, Users, Zap, CheckSquare, ArrowRight 
+        } from 'lucide-react';
+
+        // --- Shared Components ---
+
+        const Button = ({ children, onClick, variant = 'primary', className = '' }) => {
+            const baseStyle = "px-8 py-3 font-black uppercase tracking-wider transition-all duration-300 transform -skew-x-12 flex items-center justify-center gap-2 group cursor-pointer";
+            
+            const variants = {
+                primary: "bg-orange-500 text-black hover:bg-white hover:text-orange-600 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(249,115,22,1)]",
+                outline: "border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black",
+                white: "bg-white text-black hover:bg-neutral-200"
+            };
+
+            return (
+                <button onClick={onClick} className={`${baseStyle} ${variants[variant]} ${className}`}>
+                    <span className="skew-x-12 inline-flex items-center gap-2">{children}</span>
+                </button>
+            );
+        };
+
+        const SectionHeader = ({ title, subtitle, centered = true }) => (
+            <div className={`mb-20 space-y-4 animate-fade-in-up ${centered ? 'text-center' : 'text-left'}`}>
+                <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-neutral-500 italic">
+                    {title}
+                </h2>
+                <div className={`h-2 w-32 bg-orange-500 skew-x-12 ${centered ? 'mx-auto' : ''}`}></div>
+                {subtitle && <p className="text-orange-100/60 max-w-2xl text-xl font-light">{subtitle}</p>}
+            </div>
+        );
+
+        // --- Page Components ---
+
+        const Home = ({ changePage }) => (
+            <div className="animate-fade-in relative min-h-screen">
+                
+                {/* Fixed Background Image */}
+                <div className="fixed inset-0 z-0">
+                    <img 
+                        src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop" 
+                        alt="Gym Background" 
+                        className="w-full h-full object-cover opacity-60"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/80 to-neutral-950/40"></div>
+                </div>
+
+                {/* Hero Section */}
+                <section className="relative min-h-screen flex items-center overflow-hidden z-10">
+                    <div className="relative container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+                        <div className="text-left space-y-8">
+                            <div className="flex items-center gap-3 text-orange-500 font-mono font-bold tracking-widest uppercase">
+                                <div className="w-8 h-[2px] bg-orange-500"></div>
+                                IronPulse Gym
+                            </div>
+                            
+                            <h1 className="text-7xl md:text-9xl font-black text-white italic leading-[0.85] tracking-tighter drop-shadow-2xl">
+                                BURN <br />
+                                <span className="text-stroke-white text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">
+                                    RISE
+                                </span> <br />
+                                REPEAT
+                            </h1>
+                            
+                            <p className="text-xl text-neutral-300 max-w-lg border-l-2 border-orange-500 pl-6 drop-shadow-md">
+                                Forge your body in the fire of discipline. The most aggressive training facility in the city.
+                            </p>
+                            
+                            <div className="flex flex-wrap gap-4 pt-4">
+                                <Button onClick={() => changePage('membership')}>
+                                    Start Now <ArrowRight className="w-4 h-4" />
+                                </Button>
+                                <Button variant="outline" onClick={() => changePage('classes')}>Explore Classes</Button>
+                            </div>
+                        </div>
+
+                        {/* Hero Graphic */}
+                        <div className="hidden lg:block relative h-[600px]">
+                           <div className="absolute top-10 right-10 w-full h-full border-2 border-neutral-500/30 -skew-x-12 backdrop-blur-sm"></div>
+                           <div className="absolute top-0 right-0 w-full h-full -skew-x-12 flex items-center justify-center overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm shadow-2xl">
+                             <span className="text-[20rem] font-black text-white/5 absolute -rotate-12 select-none">GYM</span>
+                             <Flame className="w-64 h-64 text-orange-500 relative z-10 animate-pulse drop-shadow-[0_0_35px_rgba(249,115,22,0.5)]" />
+                           </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Stats Strip */}
+                <div className="bg-orange-600 py-12 -skew-y-2 transform origin-left translate-y-[-50%] relative z-20 shadow-xl shadow-orange-900/50">
+                   <div className="container mx-auto px-6 skew-y-2 flex flex-wrap justify-between items-center gap-8 text-black">
+                      {[
+                        { num: "25k+", label: "Sq Ft Space" },
+                        { num: "100+", label: "Elite Trainers" },
+                        { num: "24/7", label: "Access" },
+                      ].map((stat, i) => (
+                        <div key={i} className="text-center md:text-left">
+                          <div className="text-5xl font-black italic tracking-tighter">{stat.num}</div>
+                          <div className="text-sm font-bold uppercase tracking-widest opacity-80">{stat.label}</div>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+
+                {/* Features */}
+                <section className="py-24 relative z-10">
+                  <div className="container mx-auto px-6">
+                    <div className="grid md:grid-cols-3 gap-8">
+                      {[
+                        { 
+                          icon: Dumbbell, 
+                          title: "Heavy Iron", 
+                          desc: "No plastic. Only competition-grade steel and calibrated plates."
+                        },
+                        { 
+                          icon: Zap, 
+                          title: "High Voltage", 
+                          desc: "Atmosphere charged with adrenaline and high-tempo acoustics."
+                        },
+                        { 
+                          icon: Clock, 
+                          title: "Zero Limits", 
+                          desc: "We never close. The grind doesn't have operating hours."
+                        }
+                      ].map((feature, idx) => (
+                        <div key={idx} className="group relative p-8 bg-neutral-950/80 backdrop-blur-md hover:bg-neutral-900 transition-all duration-300 border-l-4 border-transparent hover:border-orange-500 overflow-hidden shadow-lg">
+                          <div className="relative z-10">
+                            <feature.icon className="w-12 h-12 text-orange-500 mb-6 group-hover:scale-110 transition-transform drop-shadow-[0_0_10px_rgba(249,115,22,0.3)]" />
+                            <h3 className="text-2xl font-black italic text-white mb-4">{feature.title}</h3>
+                            <p className="text-gray-400 group-hover:text-gray-300 transition-colors">{feature.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+            </div>
+        );
+
+        const Classes = () => {
+          const classes = [
+            { title: "Inferno HIIT", time: "06:00 AM", trainer: "BLAZE", diff: "HARD" },
+            { title: "Iron Pump", time: "08:00 AM", trainer: "AXEL", diff: "MED" },
+            { title: "Combat Ready", time: "05:00 PM", trainer: "ROXY", diff: "EXTREME" },
+            { title: "Power Lift", time: "07:00 PM", trainer: "TANK", diff: "HARD" },
+          ];
+
+          return (
+            <div className="pt-32 pb-24 min-h-screen bg-neutral-950 animate-fade-in relative overflow-hidden">
+              <div className="fixed inset-0 z-0">
+                <img 
+                  src="https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?q=80&w=2071&auto=format&fit=crop" 
+                  alt="Classes Hero Background" 
+                  className="w-full h-full object-cover opacity-60" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-black/40"></div>
+              </div>
+
+              <div className="container mx-auto px-6 relative z-10">
+                <SectionHeader title="The Arena" subtitle="Choose your battleground." />
+                
+                <div className="space-y-4">
+                  {classes.map((cls, idx) => (
+                    <div key={idx} className="group relative overflow-hidden bg-neutral-900/80 backdrop-blur-md border border-neutral-800 hover:border-orange-500 transition-all duration-300">
+                      <div className="relative z-10 flex flex-col md:flex-row items-center">
+                        <div className="bg-black/40 backdrop-blur-sm p-8 w-full md:w-48 text-center border-r border-neutral-800 group-hover:bg-orange-500 group-hover:text-black transition-colors">
+                           <span className="block text-2xl font-black italic">{cls.time.split(' ')[0]}</span>
+                           <span className="text-xs font-bold">{cls.time.split(' ')[1]}</span>
+                        </div>
+                        <div className="p-8 flex-grow flex flex-col md:flex-row justify-between items-center w-full gap-4">
+                          <div className="drop-shadow-lg">
+                            <h3 className="text-3xl font-black italic text-white uppercase drop-shadow-md">{cls.title}</h3>
+                            <p className="text-orange-400 font-mono text-sm mt-1 font-bold">TRAINER: {cls.trainer}</p>
+                          </div>
+                          <div className="flex items-center gap-6">
+                            <span className="px-4 py-1 border border-neutral-500 bg-black/50 text-xs font-bold text-white uppercase tracking-widest backdrop-blur-sm">
+                              {cls.diff}
+                            </span>
+                            <Button variant="outline" className="py-2 px-6 text-xs bg-black/50 backdrop-blur-sm hover:bg-orange-500">Book</Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const Membership = () => {
+          return (
+            <div className="pt-32 pb-24 min-h-screen bg-neutral-950 animate-fade-in relative overflow-hidden">
+              <div className="fixed inset-0 z-0">
+                <img 
+                  src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop" 
+                  alt="Membership Background" 
+                  className="w-full h-full object-cover opacity-60"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-black/40"></div>
+              </div>
+
+              <div className="container mx-auto px-6 relative z-10">
+                <SectionHeader title="Commit" subtitle="No contracts. Just sweat." />
+
+                <div className="grid lg:grid-cols-3 gap-0 max-w-6xl mx-auto items-center">
+                  <div className="bg-neutral-900/80 backdrop-blur-sm p-10 border-y border-neutral-800 lg:border-y-0 lg:border-l lg:border-r border-neutral-800 opacity-70 hover:opacity-100 transition-opacity">
+                    <h3 className="text-2xl font-bold text-white mb-2">Weekend Warrior</h3>
+                    <div className="text-4xl font-black text-orange-500 italic mb-6">$39<span className="text-sm text-gray-500 not-italic">/mo</span></div>
+                    <ul className="space-y-4 mb-8 text-gray-400 text-sm">
+                      <li className="flex gap-2"><CheckSquare className="w-4 h-4 text-orange-500" /> Standard Access</li>
+                      <li className="flex gap-2"><CheckSquare className="w-4 h-4 text-orange-500" /> Locker Room</li>
+                    </ul>
+                    <Button variant="white" className="w-full">Select</Button>
+                  </div>
+
+                  <div className="bg-neutral-800/95 backdrop-blur-md p-12 border-2 border-orange-500 relative transform scale-105 z-10 shadow-2xl shadow-orange-900/20">
+                    <div className="absolute top-0 right-0 bg-orange-500 text-black text-xs font-black px-3 py-1 uppercase tracking-widest">Best Value</div>
+                    <h3 className="text-3xl font-black italic text-white mb-2 uppercase">Iron Elite</h3>
+                    <div className="text-6xl font-black text-white italic mb-8">$69<span className="text-lg text-gray-500 not-italic">/mo</span></div>
+                    <ul className="space-y-6 mb-10 text-gray-300">
+                      <li className="flex gap-3"><Flame className="w-5 h-5 text-orange-500" /> 24/7 All-Access Pass</li>
+                      <li className="flex gap-3"><Flame className="w-5 h-5 text-orange-500" /> Unlimited Classes</li>
+                      <li className="flex gap-3"><Flame className="w-5 h-5 text-orange-500" /> Guest Privileges</li>
+                      <li className="flex gap-3"><Flame className="w-5 h-5 text-orange-500" /> Sauna Recovery</li>
+                    </ul>
+                    <Button variant="primary" className="w-full py-4 text-lg">Join The Elite</Button>
+                  </div>
+
+                  <div className="bg-neutral-900/80 backdrop-blur-sm p-10 border-y border-neutral-800 lg:border-y-0 lg:border-r border-neutral-800 opacity-70 hover:opacity-100 transition-opacity">
+                    <h3 className="text-2xl font-bold text-white mb-2">Professional</h3>
+                    <div className="text-4xl font-black text-orange-500 italic mb-6">$99<span className="text-sm text-gray-500 not-italic">/mo</span></div>
+                    <ul className="space-y-4 mb-8 text-gray-400 text-sm">
+                      <li className="flex gap-2"><CheckSquare className="w-4 h-4 text-orange-500" /> Personal Training (2x)</li>
+                      <li className="flex gap-2"><CheckSquare className="w-4 h-4 text-orange-500" /> Private Locker</li>
+                      <li className="flex gap-2"><CheckSquare className="w-4 h-4 text-orange-500" /> Nutrition Plan</li>
+                    </ul>
+                    <Button variant="white" className="w-full">Select</Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const Contact = () => {
+          return (
+            <div className="pt-32 pb-24 min-h-screen bg-neutral-950 animate-fade-in relative overflow-hidden">
+              <div className="fixed inset-0 z-0">
+                <img 
+                  src="https://images.unsplash.com/photo-1596357395217-80de13130e92?q=80&w=2071&auto=format&fit=crop" 
+                  alt="Contact Background" 
+                  className="w-full h-full object-cover opacity-60" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/60 to-black/40"></div>
+              </div>
+
+              <div className="absolute -right-24 top-1/4 w-96 h-96 bg-orange-600/20 rounded-full blur-3xl z-0 mix-blend-overlay"></div>
+
+              <div className="container mx-auto px-6 relative z-10">
+                <div className="grid lg:grid-cols-2 gap-16">
+                  <div className="space-y-12">
+                    <SectionHeader title="Locate Us" subtitle="123 Iron Street, Sector 7." centered={false} />
+                    
+                    <div className="space-y-8 pl-6 border-l-4 border-orange-500 bg-black/60 p-8 backdrop-blur-md rounded-r-xl">
+                      {[
+                        { label: "Location", val: "Industrial Zone, NY" },
+                        { label: "Support", val: "help@ironpulse.com" },
+                        { label: "Hotline", val: "888-IRON-GYM" }
+                      ].map((item, i) => (
+                        <div key={i}>
+                          <h4 className="text-orange-500 text-xs font-bold uppercase tracking-widest mb-1">{item.label}</h4>
+                          <p className="text-2xl md:text-3xl font-bold text-white italic">{item.val}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-black/60 backdrop-blur-md p-8 md:p-12 border border-neutral-800 h-fit">
+                    <h3 className="text-2xl font-black text-white uppercase italic mb-8">Send Transimission</h3>
+                    <form className="space-y-6">
+                      <div className="grid grid-cols-2 gap-6">
+                        <input type="text" placeholder="NAME" className="bg-transparent border-b-2 border-neutral-600 p-4 text-white focus:border-orange-500 focus:outline-none transition-colors placeholder-neutral-500 font-bold" />
+                        <input type="email" placeholder="EMAIL" className="bg-transparent border-b-2 border-neutral-600 p-4 text-white focus:border-orange-500 focus:outline-none transition-colors placeholder-neutral-500 font-bold" />
+                      </div>
+                      <textarea rows="4" placeholder="MESSAGE" className="w-full bg-transparent border-b-2 border-neutral-600 p-4 text-white focus:border-orange-500 focus:outline-none transition-colors placeholder-neutral-500 font-bold"></textarea>
+                      <Button className="w-full">Launch Message</Button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        // --- Main App Component ---
+
+        const App = () => {
+          const [currentPage, setCurrentPage] = useState('home');
+          const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+          const navLinks = [
+            { id: 'home', label: 'Home' },
+            { id: 'classes', label: 'Schedule' },
+            { id: 'membership', label: 'Pricing' },
+            { id: 'contact', label: 'Contact' }
+          ];
+
+          const handleNavClick = (id) => {
+            setCurrentPage(id);
+            setIsMenuOpen(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          };
+
+          return (
+            <div className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-orange-500 selection:text-white">
+              {/* Navbar - Brutalist Style */}
+              <nav className="fixed w-full z-50 bg-neutral-950/90 backdrop-blur-lg border-b border-white/5">
+                <div className="container mx-auto px-6 h-20 flex justify-between items-center">
+                  <div 
+                    className="flex items-center gap-1 cursor-pointer group" 
+                    onClick={() => handleNavClick('home')}
+                  >
+                    <Flame className="w-8 h-8 text-orange-500 group-hover:scale-110 transition-transform" />
+                    <span className="text-2xl font-black italic tracking-tighter">IRON<span className="text-orange-500">PULSE</span></span>
+                  </div>
+
+                  <div className="hidden md:flex items-center gap-10">
+                    {navLinks.map((link) => (
+                      <button
+                        key={link.id}
+                        onClick={() => handleNavClick(link.id)}
+                        className={`text-sm font-bold uppercase tracking-widest hover:text-orange-500 transition-colors relative group ${currentPage === link.id ? 'text-orange-500' : 'text-gray-400'}`}
+                      >
+                        {link.label}
+                        <span className={`absolute -bottom-2 left-0 h-[2px] bg-orange-500 transition-all duration-300 ${currentPage === link.id ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+                      </button>
+                    ))}
+                    <Button onClick={() => handleNavClick('membership')} className="ml-4 py-2 px-6 text-sm">Join Club</Button>
+                  </div>
+
+                  <button className="md:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                    {isMenuOpen ? <X /> : <Menu />}
+                  </button>
+                </div>
+              </nav>
+
+              <div className={`fixed inset-0 bg-neutral-950 z-40 flex flex-col items-center justify-center gap-10 transition-transform duration-300 md:hidden ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                 {navLinks.map((link) => (
+                  <button
+                    key={link.id}
+                    onClick={() => handleNavClick(link.id)}
+                    className="text-4xl font-black italic uppercase text-transparent bg-clip-text bg-gradient-to-r from-white to-neutral-500 hover:text-orange-500"
+                  >
+                    {link.label}
+                  </button>
+                ))}
+              </div>
+
+              <main>
+                {currentPage === 'home' && <Home changePage={handleNavClick} />}
+                {currentPage === 'classes' && <Classes />}
+                {currentPage === 'membership' && <Membership />}
+                {currentPage === 'contact' && <Contact />}
+              </main>
+
+              <footer className="relative bg-neutral-950 pt-20 pb-10 overflow-hidden border-t-4 border-orange-500">
+                  <div className="absolute inset-0 z-0">
+                     <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover opacity-10 grayscale" alt="Footer bg" />
+                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/90 to-transparent"></div>
+                  </div>
+
+                  <div className="container mx-auto px-6 relative z-10">
+                     <div className="grid md:grid-cols-4 gap-12 mb-16">
+                         <div className="col-span-1 md:col-span-2">
+                             <div className="flex items-center gap-2 mb-6">
+                                 <Flame className="w-8 h-8 text-orange-500" />
+                                 <span className="text-2xl font-black italic tracking-tighter text-white">IRON<span className="text-orange-500">PULSE</span></span>
+                             </div>
+                             <p className="text-neutral-400 max-w-sm mb-6">
+                                 The premier destination for serious athletes. We provide the iron, you provide the will.
+                             </p>
+                             <div className="flex gap-4">
+                                 {['Fb', 'Tw', 'Ig', 'Yt'].map(s => (
+                                     <div key={s} className="w-10 h-10 bg-neutral-900 border border-neutral-800 flex items-center justify-center text-white hover:border-orange-500 hover:text-orange-500 transition-colors cursor-pointer font-bold uppercase text-xs">
+                                         {s}
+                                     </div>
+                                 ))}
+                             </div>
+                         </div>
+
+                         <div>
+                             <h4 className="text-white font-black uppercase tracking-widest mb-6 border-l-4 border-orange-500 pl-4">Explore</h4>
+                             <ul className="space-y-3 text-neutral-400">
+                                 {['Classes', 'Membership', 'Trainers', 'About Us'].map(l => (
+                                     <li key={l} className="hover:text-orange-500 cursor-pointer transition-colors flex items-center gap-2">
+                                         <ChevronRight className="w-3 h-3 text-orange-500" /> {l}
+                                     </li>
+                                 ))}
+                             </ul>
+                         </div>
+
+                         <div>
+                             <h4 className="text-white font-black uppercase tracking-widest mb-6 border-l-4 border-orange-500 pl-4">Hours</h4>
+                             <ul className="space-y-3 text-neutral-400">
+                                 <li className="flex justify-between"><span>Mon - Fri</span> <span className="text-white font-bold">24 Hours</span></li>
+                                 <li className="flex justify-between"><span>Saturday</span> <span className="text-white font-bold">24 Hours</span></li>
+                                 <li className="flex justify-between"><span>Sunday</span> <span className="text-white font-bold">06:00 - 22:00</span></li>
+                             </ul>
+                         </div>
+                     </div>
+                     
+                     <div className="border-t border-neutral-800 pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center text-neutral-600 text-sm">
+                         <p>&copy; 2024 IRONPULSE. FORGE YOUR LEGACY.</p>
+                         <div className="flex gap-6 mt-4 md:mt-0">
+                             <span className="hover:text-white cursor-pointer">Privacy Policy</span>
+                             <span className="hover:text-white cursor-pointer">Terms of Service</span>
+                         </div>
+                     </div>
+                  </div>
+              </footer>
+            </div>
+          );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

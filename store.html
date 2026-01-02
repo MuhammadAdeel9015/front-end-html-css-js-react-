@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.A Fashion Store | Adeel Ali</title>
+    
+    <!-- Tailwind CSS (Play CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM (Stable Production Versions) -->
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Custom Fonts -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Lato:wght@300;400;700&display=swap');
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-sans { font-family: 'Lato', sans-serif; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-up { animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        /* Hide scrollbar for chrome/safari/opera */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .scrollbar-hide {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="bg-white font-sans text-stone-800 selection:bg-rose-100 selection:text-rose-900">
+    
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- Imports & Setup ---
+        const { useState, useEffect } = React;
+        
+        // --- Icons (Embedded directly to prevent CDN errors) ---
+        const Icon = ({ children, ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>{children}</svg>
+        );
+
+        const ShoppingBag = (props) => <Icon {...props}><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></Icon>;
+        const Search = (props) => <Icon {...props}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></Icon>;
+        const Menu = (props) => <Icon {...props}><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></Icon>;
+        const X = (props) => <Icon {...props}><path d="M18 6 6 18"/><path d="m6 6 18 18"/></Icon>;
+        const Star = (props) => <Icon {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></Icon>;
+        const Trash2 = (props) => <Icon {...props}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></Icon>;
+        const ArrowRight = (props) => <Icon {...props}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></Icon>;
+        const CreditCard = (props) => <Icon {...props}><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></Icon>;
+        const Facebook = (props) => <Icon {...props}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></Icon>;
+        const Twitter = (props) => <Icon {...props}><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-12.7 12.5S.2 5.3 4.1 2"/><path d="M20 4s-1.5-.5-3.5 0"/><path d="M20 4s-1.1 5-6 5"/></Icon>;
+        const Instagram = (props) => <Icon {...props}><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></Icon>;
+        const Truck = (props) => <Icon {...props}><path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11"/><path d="M14 9h4l4 4v4c0 .6-.4 1-1 1h-2"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></Icon>;
+        const ShieldCheck = (props) => <Icon {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></Icon>;
+        const RefreshCw = (props) => <Icon {...props}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></Icon>;
+        const Mail = (props) => <Icon {...props}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></Icon>;
+        const ChevronRight = (props) => <Icon {...props}><path d="m9 18 6-6-6-6"/></Icon>;
+        const ArrowLeft = (props) => <Icon {...props}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></Icon>;
+
+        // --- Mock Data ---
+        const PRODUCTS = [
+            // Men's Shoes
+            {
+                id: 1,
+                name: "Noir Leather Loafers",
+                price: 89.99,
+                category: "Men's Shoes",
+                rating: 4.8,
+                image: "https://images.unsplash.com/photo-1614252369475-531eba835eb1?auto=format&fit=crop&q=80&w=1000",
+                description: "Hand-stitched Italian leather. The definition of timeless elegance."
+            },
+            {
+                id: 6,
+                name: "Suede Chelsea Boots",
+                price: 105.99,
+                category: "Men's Shoes",
+                rating: 4.5,
+                image: "https://images.unsplash.com/photo-1638247025967-b4e38f787b76?auto=format&fit=crop&q=80&w=1000",
+                description: "Rugged yet refined. The perfect transition from office to outdoors."
+            },
+            {
+                id: 9,
+                name: "Oxford Brogues",
+                price: 125.00,
+                category: "Men's Shoes",
+                rating: 4.9,
+                image: "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?auto=format&fit=crop&q=80&w=1000",
+                description: "Classic wingtip detailing for the sophisticated gentleman."
+            },
+            {
+                id: 10,
+                name: "Urban Low Tops",
+                price: 75.00,
+                category: "Men's Shoes",
+                rating: 4.6,
+                image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80&w=1000",
+                description: "Minimalist leather sneakers for everyday comfort."
+            },
+            {
+                id: 11,
+                name: "Formal Derbies",
+                price: 95.00,
+                category: "Men's Shoes",
+                rating: 4.7,
+                image: "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&q=80&w=1000",
+                description: "Polished finish, perfect for business and formal events."
+            },
+
+            // Bags
+            {
+                id: 2,
+                name: "The Signature Tote",
+                price: 129.00,
+                category: "Bags",
+                rating: 4.9,
+                image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=1000",
+                description: "Minimalist design meeting maximum utility. Crafted from vegan suede."
+            },
+            {
+                id: 5,
+                name: "Gilded Crossbody",
+                price: 159.00,
+                category: "Bags",
+                rating: 4.8,
+                image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&q=80&w=1000",
+                description: "Evening wear essential. Gold-tone hardware with premium finish."
+            },
+            {
+                id: 12,
+                name: "Leather Backpack",
+                price: 189.00,
+                category: "Bags",
+                rating: 4.9,
+                image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=1000",
+                description: "Vintage-inspired leather backpack for the modern explorer."
+            },
+            {
+                id: 13,
+                name: "Travel Weekender",
+                price: 210.00,
+                category: "Bags",
+                rating: 4.8,
+                image: "https://images.unsplash.com/photo-1553981869-9c35bcd99cfb?auto=format&fit=crop&q=80&w=1000",
+                description: "Spacious duffel bag perfect for short getaways."
+            },
+            {
+                id: 14,
+                name: "Clutch Wallet",
+                price: 65.00,
+                category: "Bags",
+                rating: 4.6,
+                image: "https://images.unsplash.com/photo-1627123424574-18bd03641586?auto=format&fit=crop&q=80&w=1000",
+                description: "Compact and elegant, holding all your essentials."
+            },
+
+            // Kids
+            {
+                id: 3,
+                name: "Junior Sport Runners",
+                price: 45.99,
+                category: "Kids' Shoes",
+                rating: 4.7,
+                image: "https://images.unsplash.com/photo-1519415943484-9fa1873496d4?auto=format&fit=crop&q=80&w=1000",
+                description: "Built for play. Durable, comfortable, and easy to secure."
+            },
+            {
+                id: 7,
+                name: "Stardust Ballerinas",
+                price: 39.99,
+                category: "Kids' Shoes",
+                rating: 4.9,
+                image: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?auto=format&fit=crop&q=80&w=1000",
+                description: "For the little princess. Comfortable fit with a touch of magic."
+            },
+            {
+                id: 15,
+                name: "Light-Up Trainers",
+                price: 50.00,
+                category: "Kids' Shoes",
+                rating: 4.8,
+                image: "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&q=80&w=1000",
+                description: "Fun and flashy trainers that light up with every step."
+            },
+            {
+                id: 16,
+                name: "Canvas Slip-Ons",
+                price: 35.00,
+                category: "Kids' Shoes",
+                rating: 4.5,
+                image: "https://images.unsplash.com/photo-1514989940723-e8875ea28f52?auto=format&fit=crop&q=80&w=1000",
+                description: "Easy to wear slip-ons for active kids."
+            },
+            {
+                id: 17,
+                name: "Winter Boots",
+                price: 60.00,
+                category: "Kids' Shoes",
+                rating: 4.8,
+                image: "https://images.unsplash.com/photo-1516478177764-9fe5bd7e9717?auto=format&fit=crop&q=80&w=1000",
+                description: "Warm and waterproof boots for snowy adventures."
+            },
+
+            // Women's
+            {
+                id: 4,
+                name: "Velocity Knit Runners",
+                price: 110.00,
+                category: "Women's Shoes",
+                rating: 4.6,
+                image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=1000",
+                description: "Performance meets aesthetics. Cloud-foam cushioning technology."
+            },
+            {
+                id: 8,
+                name: "Riviera Canvas Slides",
+                price: 55.00,
+                category: "Women's Shoes",
+                rating: 4.7,
+                image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&q=80&w=1000",
+                description: "Effortless summer style. Breathable organic cotton canvas."
+            },
+            {
+                id: 18,
+                name: "Platform Sandals",
+                price: 85.00,
+                category: "Women's Shoes",
+                rating: 4.6,
+                image: "https://images.unsplash.com/photo-1562273138-f46be4ebdf33?auto=format&fit=crop&q=80&w=1000",
+                description: "Elevate your style with these comfortable platform sandals."
+            },
+            {
+                id: 19,
+                name: "Classic Pumps",
+                price: 95.00,
+                category: "Women's Shoes",
+                rating: 4.8,
+                image: "https://images.unsplash.com/photo-1534653299134-96a171b61581?auto=format&fit=crop&q=80&w=1000",
+                description: "Timeless high heels for work or a night out."
+            },
+            {
+                id: 20,
+                name: "Ankle Strap Heels",
+                price: 100.00,
+                category: "Women's Shoes",
+                rating: 4.7,
+                image: "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?auto=format&fit=crop&q=80&w=1000",
+                description: "Delicate strap details for a feminine touch."
+            }
+        ];
+
+        const CATEGORIES = ["All", "Men's Shoes", "Women's Shoes", "Kids' Shoes", "Bags"];
+
+        // --- Icons & UI Elements ---
+
+        const LogoIcon = ({ className }) => (
+            <svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+                <path d="M50 10L20 90H35L50 50L65 90H80L50 10Z" fill="currentColor" opacity="0.9"/>
+                <path d="M50 25L35 65H42L50 45L58 65H65L50 25Z" fill="currentColor" className="text-white/40 mix-blend-overlay"/>
+                <path d="M30 90L15 90L45 10L55 10L85 90L70 90" stroke="currentColor" strokeWidth="2"/>
+            </svg>
+        );
+
+        const ProductCard = ({ product, addToCart }) => (
+            <div className="group relative animate-fade-in-up">
+                <div className="relative aspect-[3/4] overflow-hidden bg-white rounded-sm shadow-sm hover:shadow-xl transition-shadow duration-500">
+                <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    className="h-full w-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[1px]">
+                    <button 
+                    onClick={() => addToCart(product)}
+                    className="translate-y-4 group-hover:translate-y-0 transition-all duration-500 bg-stone-900 text-white px-8 py-3 uppercase tracking-widest text-xs font-bold hover:bg-rose-500"
+                    >
+                    Add to Bag
+                    </button>
+                </div>
+                <div className="absolute top-4 left-4">
+                    {product.id === 1 && <span className="bg-stone-800 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-widest">Best Seller</span>}
+                    {product.id === 2 && <span className="bg-rose-400 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-widest">New</span>}
+                </div>
+                </div>
+                <div className="mt-4 flex justify-between items-start px-1">
+                <div>
+                    <p className="text-xs text-stone-400 uppercase tracking-wider mb-1">{product.category}</p>
+                    <h3 className="text-base font-serif font-medium text-stone-800 group-hover:text-rose-600 transition-colors cursor-pointer">
+                    {product.name}
+                    </h3>
+                </div>
+                <p className="text-base font-medium text-stone-900">${product.price}</p>
+                </div>
+            </div>
+        );
+
+        // --- Page Components ---
+
+        const Home = ({ navigate, addToCart }) => {
+            const featuredProducts = PRODUCTS.slice(0, 8); // Show more featured items
+            return (
+                <React.Fragment>
+                <div className="relative min-h-[600px] h-screen w-full overflow-hidden bg-rose-50/50 flex items-center justify-center pt-20">
+                    <div className="absolute inset-0">
+                    <img 
+                        src="https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80&w=2500" 
+                        alt="Luxury Footwear" 
+                        className="w-full h-full object-cover object-center opacity-90"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/50 to-transparent"></div>
+                    </div>
+                    <div className="relative z-10 max-w-7xl mx-auto px-6 w-full flex items-center">
+                        <div className="max-w-2xl text-stone-900 animate-fade-in-up">
+                        <p className="text-sm md:text-base tracking-[0.3em] uppercase mb-4 text-rose-500 font-medium">Est. 2024 • Adeel Ali</p>
+                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-medium leading-tight mb-8 text-stone-800">
+                            Refined <br/>
+                            <span className="italic font-light text-stone-600">Elegance</span>
+                        </h1>
+                        <p className="text-lg text-stone-600 mb-10 max-w-md font-light leading-relaxed border-l-2 border-rose-300 pl-6">
+                            Discover a collection where traditional craftsmanship meets contemporary design. 
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-6">
+                            <button onClick={() => navigate('women')} className="px-10 py-4 bg-stone-900 text-white font-medium tracking-widest uppercase hover:bg-rose-500 hover:text-white transition-all duration-500 ease-out shadow-lg shadow-stone-900/10">
+                            Shop Women
+                            </button>
+                            <button onClick={() => navigate('men')} className="px-10 py-4 border border-stone-900 text-stone-900 font-medium tracking-widest uppercase hover:bg-stone-900 hover:text-white transition-all duration-500 ease-out flex items-center justify-center gap-2">
+                            Shop Men <ChevronRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="py-24 bg-white">
+                    <div className="max-w-7xl mx-auto px-6">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl font-serif font-medium text-stone-800 mb-4">Featured Selections</h2>
+                        <div className="w-24 h-1 bg-rose-300 mx-auto"></div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                        {featuredProducts.map(product => (
+                        <ProductCard key={product.id} product={product} addToCart={addToCart} />
+                        ))}
+                    </div>
+                    <div className="text-center mt-12">
+                        <button onClick={() => navigate('all')} className="text-stone-800 border-b border-stone-800 pb-1 hover:text-rose-500 hover:border-rose-500 transition-colors uppercase tracking-widest text-sm">View All Products</button>
+                    </div>
+                    </div>
+                </div>
+                </React.Fragment>
+            );
+        };
+
+        const CategoryPage = ({ category, title, subtitle, products, addToCart }) => {
+            return (
+                <div className="pt-32 pb-24 min-h-screen bg-white animate-fade-in-up">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="mb-12 border-b border-stone-100 pb-8 flex flex-col md:flex-row justify-between items-end">
+                    <div>
+                        <p className="text-rose-500 font-bold tracking-widest uppercase text-xs mb-2">Collection 2024</p>
+                        <h1 className="text-5xl font-serif font-medium text-stone-800">{title}</h1>
+                        <p className="text-stone-500 mt-4 max-w-lg font-light">{subtitle}</p>
+                    </div>
+                    <span className="text-stone-400 font-serif italic mt-4 md:mt-0">{products.length} Products Found</span>
+                    </div>
+
+                    {products.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
+                        {products.map(product => (
+                        <ProductCard key={product.id} product={product} addToCart={addToCart} />
+                        ))}
+                    </div>
+                    ) : (
+                    <div className="py-32 text-center border border-dashed border-stone-200 bg-stone-50/50 rounded-lg">
+                        <p className="text-stone-400 font-serif italic text-xl mb-4">No pieces found in this collection.</p>
+                    </div>
+                    )}
+                </div>
+                </div>
+            );
+        };
+
+        // --- Main App ---
+
+        function App() {
+            const [cart, setCart] = useState([]);
+            const [isCartOpen, setIsCartOpen] = useState(false);
+            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+            const [notification, setNotification] = useState(null);
+            const [scrolled, setScrolled] = useState(false);
+            const [currentView, setCurrentView] = useState('home'); // home, men, women, kids, bags, all
+            const [searchQuery, setSearchQuery] = useState("");
+
+            // --- Logic ---
+            useEffect(() => {
+                const handleScroll = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const navigate = (view) => {
+                setCurrentView(view);
+                setIsMobileMenuOpen(false);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const addToCart = (product) => {
+                setCart(prev => {
+                const existing = prev.find(item => item.id === product.id);
+                if (existing) {
+                    return prev.map(item => 
+                    item.id === product.id ? { ...item, qty: item.qty + 1 } : item
+                    );
+                }
+                return [...prev, { ...product, qty: 1 }];
+                });
+                setNotification(`${product.name} added to cart`);
+                setTimeout(() => setNotification(null), 3000);
+            };
+
+            const removeFromCart = (id) => {
+                setCart(prev => prev.filter(item => item.id !== id));
+            };
+
+            const updateQty = (id, delta) => {
+                setCart(prev => prev.map(item => {
+                if (item.id === id) {
+                    const newQty = Math.max(1, item.qty + delta);
+                    return { ...item, qty: newQty };
+                }
+                return item;
+                }));
+            };
+
+            const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
+
+            // --- View Filtering ---
+            const getFilteredProducts = () => {
+                let filtered = PRODUCTS;
+                
+                // Filter by view/category
+                switch (currentView) {
+                    case 'men': filtered = filtered.filter(p => p.category === "Men's Shoes"); break;
+                    case 'women': filtered = filtered.filter(p => p.category === "Women's Shoes"); break;
+                    case 'kids': filtered = filtered.filter(p => p.category === "Kids' Shoes"); break;
+                    case 'bags': filtered = filtered.filter(p => p.category === "Bags"); break;
+                    case 'all': break; // No category filter
+                    default: break; // Home uses logic inside Home component
+                }
+
+                // Filter by Search Query
+                if (searchQuery) {
+                    filtered = filtered.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+                }
+
+                return filtered;
+            };
+
+            // --- Layout Components ---
+
+            const Navbar = () => (
+                <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${
+                scrolled || currentView !== 'home'
+                    ? 'bg-white/95 backdrop-blur-md shadow-sm py-4 text-stone-900' 
+                    : 'bg-white/80 backdrop-blur-sm py-6 text-stone-900 border-b border-white/20'
+                }`}>
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="flex justify-between items-center">
+                    
+                    <div className="hidden md:flex space-x-8">
+                        <button onClick={() => navigate('home')} className={`text-sm font-medium tracking-widest uppercase hover:text-rose-500 transition-colors ${currentView === 'home' ? 'text-rose-500' : ''}`}>Home</button>
+                        <button onClick={() => navigate('men')} className={`text-sm font-medium tracking-widest uppercase hover:text-rose-500 transition-colors ${currentView === 'men' ? 'text-rose-500' : ''}`}>Men</button>
+                        <button onClick={() => navigate('women')} className={`text-sm font-medium tracking-widest uppercase hover:text-rose-500 transition-colors ${currentView === 'women' ? 'text-rose-500' : ''}`}>Women</button>
+                        <button onClick={() => navigate('kids')} className={`text-sm font-medium tracking-widest uppercase hover:text-rose-500 transition-colors ${currentView === 'kids' ? 'text-rose-500' : ''}`}>Kids</button>
+                        <button onClick={() => navigate('bags')} className={`text-sm font-medium tracking-widest uppercase hover:text-rose-500 transition-colors ${currentView === 'bags' ? 'text-rose-500' : ''}`}>Bags</button>
+                    </div>
+
+                    <div className="flex flex-col items-center cursor-pointer group" onClick={() => navigate('home')}>
+                        <div className={`transition-all duration-500 ${scrolled || currentView !== 'home' ? 'scale-75' : 'scale-100'}`}>
+                        <LogoIcon className="text-stone-800" />
+                        </div>
+                        <div className={`overflow-hidden transition-all duration-500 ${scrolled || currentView !== 'home' ? 'h-0 opacity-0' : 'h-auto opacity-100 mt-2'}`}>
+                        <h1 className="text-xl font-serif font-bold tracking-[0.3em] leading-none text-center text-stone-800">
+                            ADEEL ALI
+                        </h1>
+                        <div className="flex justify-center mt-1">
+                            <span className="text-xs font-arabic tracking-wider text-stone-500">عدیل علی</span>
+                        </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center space-x-6">
+                        <div className="relative hidden md:block w-8 hover:w-48 transition-all duration-300">
+                        <input 
+                            type="text" 
+                            placeholder="Search" 
+                            className="w-full pl-8 pr-4 py-1 bg-transparent border-b border-stone-300 focus:border-stone-800 focus:outline-none text-sm" 
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                if(currentView === 'home' && e.target.value) navigate('all');
+                            }}
+                        />
+                        <Search className="w-4 h-4 absolute left-0 top-1.5 cursor-pointer text-stone-500" />
+                        </div>
+                        
+                        <button className="relative group" onClick={() => setIsCartOpen(true)}>
+                        <ShoppingBag className="w-5 h-5 text-stone-800 group-hover:text-rose-500 transition-colors" />
+                        {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-2 flex items-center justify-center w-4 h-4 bg-rose-400 text-white text-[10px] rounded-full shadow-sm">
+                            {cartCount}
+                            </span>
+                        )}
+                        </button>
+                        <button className="md:hidden text-stone-800" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                        {isMobileMenuOpen ? <X /> : <Menu />}
+                        </button>
+                    </div>
+                    </div>
+                </div>
+
+                {isMobileMenuOpen && (
+                    <div className="md:hidden absolute top-full left-0 w-full bg-white text-stone-900 border-t border-gray-100 shadow-xl animate-fade-in-up">
+                    <div className="flex flex-col p-6 space-y-6 text-center">
+                        <button onClick={() => navigate('home')} className="text-lg font-serif hover:text-rose-500">Home</button>
+                        <button onClick={() => navigate('men')} className="text-lg font-serif hover:text-rose-500">Men</button>
+                        <button onClick={() => navigate('women')} className="text-lg font-serif hover:text-rose-500">Women</button>
+                        <button onClick={() => navigate('kids')} className="text-lg font-serif hover:text-rose-500">Kids</button>
+                        <button onClick={() => navigate('bags')} className="text-lg font-serif hover:text-rose-500">Bags</button>
+                    </div>
+                    </div>
+                )}
+                </nav>
+            );
+
+            const Footer = () => (
+                <footer className="bg-stone-100 text-stone-500 py-20 border-t border-stone-200">
+                <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
+                    <div className="col-span-1 md:col-span-1">
+                    <LogoIcon className="text-stone-800" />
+                    <p className="mt-8 text-sm leading-7">
+                        Crafting the extraordinary for the modern individual. A legacy of quality, style, and innovation.
+                    </p>
+                    </div>
+                    <div>
+                    <h4 className="text-stone-900 text-sm font-bold tracking-widest uppercase mb-8">Boutique</h4>
+                    <ul className="space-y-4 text-sm">
+                        <li><button onClick={() => navigate('men')} className="hover:text-rose-500 transition-colors">Men</button></li>
+                        <li><button onClick={() => navigate('women')} className="hover:text-rose-500 transition-colors">Women</button></li>
+                        <li><button onClick={() => navigate('bags')} className="hover:text-rose-500 transition-colors">Bags</button></li>
+                    </ul>
+                    </div>
+                    <div>
+                    <h4 className="text-stone-900 text-sm font-bold tracking-widest uppercase mb-8">Client Services</h4>
+                    <ul className="space-y-4 text-sm">
+                        <li><a href="#" className="hover:text-rose-500 transition-colors">Shipping & Returns</a></li>
+                        <li><a href="#" className="hover:text-rose-500 transition-colors">Size Guide</a></li>
+                        <li><a href="#" className="hover:text-rose-500 transition-colors">Contact</a></li>
+                    </ul>
+                    </div>
+                    <div>
+                    <h4 className="text-stone-900 text-sm font-bold tracking-widest uppercase mb-8">Connect</h4>
+                    <div className="flex space-x-6">
+                        <Instagram className="w-5 h-5 hover:text-rose-500 transition-colors cursor-pointer" />
+                        <Facebook className="w-5 h-5 hover:text-rose-500 transition-colors cursor-pointer" />
+                        <Twitter className="w-5 h-5 hover:text-rose-500 transition-colors cursor-pointer" />
+                    </div>
+                    <p className="mt-8 text-xs">&copy; 2024 Adeel Ali. All rights reserved.</p>
+                    </div>
+                </div>
+                </footer>
+            );
+
+            const CartDrawer = () => (
+                <div className={`fixed inset-0 z-[100] ${isCartOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+                <div className={`absolute inset-0 bg-stone-500/30 backdrop-blur-sm transition-opacity duration-500 ${isCartOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsCartOpen(false)} />
+                <div className={`absolute inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl transform transition-transform duration-500 ease-out ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                    <div className="h-full flex flex-col">
+                    <div className="px-8 py-6 border-b border-stone-100 flex justify-between items-center bg-stone-50/50">
+                        <h2 className="text-2xl font-serif font-medium text-stone-800">Your Selection</h2>
+                        <button onClick={() => setIsCartOpen(false)} className="text-stone-400 hover:text-rose-500 transition-colors"><X className="w-6 h-6" /></button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                        {cart.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center text-center">
+                            <ShoppingBag className="w-10 h-10 text-rose-200 mb-4" />
+                            <p className="text-stone-500">Your shopping bag is empty.</p>
+                        </div>
+                        ) : (
+                        cart.map(item => (
+                            <div key={item.id} className="flex gap-6">
+                            <div className="w-24 h-32 bg-stone-100 overflow-hidden rounded-sm">
+                                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 flex flex-col justify-between py-1">
+                                <div>
+                                <div className="flex justify-between">
+                                    <h3 className="font-serif font-medium text-lg text-stone-900">{item.name}</h3>
+                                    <button onClick={() => removeFromCart(item.id)} className="text-stone-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                                </div>
+                                <p className="text-xs uppercase tracking-wider text-stone-400 mt-1">{item.category}</p>
+                                </div>
+                                <div className="flex justify-between items-end">
+                                <div className="flex items-center border border-stone-200 rounded-sm">
+                                    <button onClick={() => updateQty(item.id, -1)} className="px-3 py-1 hover:bg-stone-50 text-stone-600">-</button>
+                                    <span className="px-2 text-sm text-stone-800">{item.qty}</span>
+                                    <button onClick={() => updateQty(item.id, 1)} className="px-3 py-1 hover:bg-stone-50 text-stone-600">+</button>
+                                </div>
+                                <p className="font-medium text-stone-900">${item.price}</p>
+                                </div>
+                            </div>
+                            </div>
+                        ))
+                        )}
+                    </div>
+                    {cart.length > 0 && (
+                        <div className="p-8 bg-stone-50 border-t border-stone-100">
+                        <div className="flex justify-between mb-4 text-lg font-serif font-medium text-stone-900"><span>Subtotal</span><span>${cartTotal.toFixed(2)}</span></div>
+                        <button className="w-full bg-stone-900 text-white py-4 uppercase tracking-widest text-sm font-bold hover:bg-rose-500 transition-colors shadow-lg">Proceed to Checkout</button>
+                        </div>
+                    )}
+                    </div>
+                </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-white font-sans text-stone-800 selection:bg-rose-100 selection:text-rose-900">
+                
+                {/* Toast Notification */}
+                <div className={`fixed top-24 right-6 z-[60] bg-white border border-stone-100 text-stone-800 px-6 py-4 shadow-xl rounded-sm transform transition-all duration-500 flex items-center gap-4 ${notification ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
+                    <div className="w-1.5 h-1.5 bg-rose-500 rounded-full"></div>
+                    <p className="text-sm tracking-wide font-medium">{notification}</p>
+                </div>
+
+                <Navbar />
+
+                {/* View Router */}
+                {currentView === 'home' && <Home navigate={navigate} addToCart={addToCart} />}
+                {currentView === 'men' && <CategoryPage category="Men's Shoes" title="Men's Collection" subtitle="Timeless elegance handcrafted for the modern gentleman." products={getFilteredProducts()} addToCart={addToCart} />}
+                {currentView === 'women' && <CategoryPage category="Women's Shoes" title="Women's Collection" subtitle="Sophisticated silhouettes for every occasion." products={getFilteredProducts()} addToCart={addToCart} />}
+                {currentView === 'kids' && <CategoryPage category="Kids' Shoes" title="Kids' World" subtitle="Comfort and playfulness combined for little steps." products={getFilteredProducts()} addToCart={addToCart} />}
+                {currentView === 'bags' && <CategoryPage category="Bags" title="Bags & Accessories" subtitle="Functional luxury to carry your essentials in style." products={getFilteredProducts()} addToCart={addToCart} />}
+                {currentView === 'all' && <CategoryPage category="All" title="Complete Catalogue" subtitle="Browse our full range of premium products." products={getFilteredProducts()} addToCart={addToCart} />}
+
+                <Footer />
+                <CartDrawer />
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

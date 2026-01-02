@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chai Chapati | Authentic Pakistani Cuisine</title>
+
+    <!-- 1. Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- 2. Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 3. React & ReactDOM & Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Google Fonts & Icons -->
+    <!-- Added 'Noto Nastaliq Urdu' for beautiful Urdu writing -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            gold: '#D4AF37',
+                            dark: '#1A1A1A',
+                            gray: '#2C2C2C',
+                            light: '#F8F9FA'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Lato"', 'sans-serif'],
+                        urdu: ['"Noto Nastaliq Urdu"', 'serif'], // Custom Urdu Font
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Overrides */
+        body { font-family: 'Lato', sans-serif; background-color: #f8f9fa; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; }
+        
+        .font-urdu-custom {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            line-height: 1.6;
+        }
+
+        .hero-bg {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-attachment: fixed;
+            background-position: center;
+            background-size: cover;
+        }
+
+        .btn-brand {
+            background-color: #D4AF37;
+            border-color: #D4AF37;
+            color: #1A1A1A;
+            font-weight: bold;
+        }
+        .btn-brand:hover {
+            background-color: #1A1A1A;
+            color: #D4AF37;
+            border-color: #1A1A1A;
+        }
+        
+        .nav-link-custom {
+            cursor: pointer;
+            position: relative;
+        }
+        .nav-link-custom::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #D4AF37;
+            transition: width 0.3s;
+        }
+        .nav-link-custom:hover::after {
+            width: 100%;
+        }
+
+        .menu-card { transition: transform 0.3s ease; }
+        .menu-card:hover { transform: translateY(-5px); }
+        
+        /* Cart Badge Animation */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .animate-pop { animation: pop 0.3s ease; }
+
+        /* Delivery Steps Animation */
+        .step-active { color: #1A1A1A; }
+        .step-inactive { color: #e5e7eb; }
+        .bg-step-active { background-color: #D4AF37; color: #1A1A1A; border-color: #D4AF37; }
+        .bg-step-inactive { background-color: #fff; color: #9ca3af; border-color: #e5e7eb; }
+    </style>
+</head>
+<body>
+
+    <!-- Loading State: Displays while React loads -->
+    <div id="root">
+        <div style="height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #1A1A1A; color: #D4AF37; font-family: sans-serif; flex-direction: column;">
+            <!-- Updated Loading Screen Logo to Urdu -->
+            <h1 style="font-family: serif; font-size: 3rem; margin-bottom: 10px;">چائے چپاتی</h1>
+            <p>Loading Website...</p>
+        </div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Data ---
+        // ==========================================
+        //  EDIT MENU ITEMS HERE
+        //  Instructions:
+        //  1. Change 'name' to the name of your dish.
+        //  2. Change 'img' to the URL of your picture.
+        //  3. Change 'price' and 'desc' as needed.
+        // ==========================================
+        const MENU_ITEMS = [
+            { 
+                id: 1, 
+                // CHANGE DISH NAME BELOW
+                name: "Chicken Biryani", 
+                price: 18, 
+                category: "main", 
+                desc: "Aromatic basmati rice cooked with tender chicken and traditional spices.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 2, 
+                // CHANGE DISH NAME BELOW
+                name: "Mutton Karahi", 
+                price: 24, 
+                category: "main", 
+                desc: "Rich and spicy mutton curry cooked in a wok with tomatoes and ginger.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1606471191009-63994c53433b?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 3, 
+                // CHANGE DISH NAME BELOW
+                name: "Beef Nihari", 
+                price: 22, 
+                category: "main", 
+                desc: "Slow-cooked beef stew with a rich, spicy gravy and marrow.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 4, 
+                // CHANGE DISH NAME BELOW
+                name: "Fish BBQ", 
+                price: 20, 
+                category: "main", 
+                desc: "Marinated fish fillets grilled to perfection with smoky traditional spices.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 5, 
+                // CHANGE DISH NAME BELOW
+                name: "Chapli Kabab", 
+                price: 16, 
+                category: "starter", 
+                desc: "Peshawari style spiced minced beef patties fried with tomatoes and green chilies.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 6, 
+                // CHANGE DISH NAME BELOW
+                name: "Seekh Kabab", 
+                price: 14, 
+                category: "starter", 
+                desc: "Juicy minced meat skewers grilled over charcoal with coriander and cumin.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 7, 
+                // CHANGE DISH NAME BELOW
+                name: "Beef Haleem", 
+                price: 19, 
+                category: "main", 
+                desc: "A rich, slow-cooked stew of wheat, barley, meat, and lentils, garnished with ginger and lemon.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1626776426342-788df2cb4054?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 8, 
+                // CHANGE DISH NAME BELOW
+                name: "Garlic Naan", 
+                price: 5, 
+                category: "starter", 
+                desc: "Soft, oven-baked flatbread topped with minced garlic and fresh cilantro butter.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 9, 
+                // CHANGE DISH NAME BELOW
+                name: "Dampukht Platter", 
+                price: 45, 
+                category: "main", 
+                desc: "Traditional Peshawari slow-cooked mutton in its own juices with bone marrow and fresh naan.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 10, 
+                // CHANGE DISH NAME BELOW
+                name: "Lahori Chargha", 
+                price: 25, 
+                category: "main", 
+                desc: "Whole chicken steamed and deep-fried with spicy Lahori masala, served with fries.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 11, 
+                // CHANGE DISH NAME BELOW
+                name: "Chicken Tikka", 
+                price: 12, 
+                category: "main", 
+                desc: "Quarter leg or breast piece marinated in yogurt and red spices, grilled over charcoal.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 12, 
+                // CHANGE DISH NAME BELOW
+                name: "Kabuli Pulao", 
+                price: 20, 
+                category: "main", 
+                desc: "Aromatic Afghan-style rice topped with caramelized carrots, sweet raisins, and tender lamb chunks.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 13, 
+                // CHANGE DISH NAME BELOW
+                name: "Yakhni Pulao", 
+                price: 18, 
+                category: "main", 
+                desc: "Classic rice dish cooked in rich mutton broth (yakhni) with whole spices for a subtle, deep flavor.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1516685018646-549198525c1b?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 14, 
+                // CHANGE DISH NAME BELOW
+                name: "Mutton Sajji", 
+                price: 40, 
+                category: "main", 
+                desc: "Balochi style roasted lamb leg, lightly spiced with salt and papaya, served with Kaak bread.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 15, 
+                // CHANGE DISH NAME BELOW
+                name: "Malai Boti", 
+                price: 15, 
+                category: "starter", 
+                desc: "Boneless chicken cubes marinated in fresh cream, green chilies, and herbs, grilled to perfection.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1606471191009-63994c53433b?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 16, 
+                // CHANGE DISH NAME BELOW
+                name: "Reshmi Kabab", 
+                price: 16, 
+                category: "starter", 
+                desc: "Silky textured minced chicken skewers seasoned with mild white spices and coriander.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 17, 
+                // CHANGE DISH NAME BELOW
+                name: "Chicken Tikka Pizza", 
+                price: 15, 
+                category: "main", 
+                desc: "Fusion style pizza topped with spicy chicken tikka chunks, onions, and mozzarella cheese.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 18, 
+                // CHANGE DISH NAME BELOW
+                name: "Zinger Burger", 
+                price: 9, 
+                category: "main", 
+                desc: "Crispy fried chicken fillet with lettuce, mayo, and cheese in a sesame bun, served with fries.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 19, 
+                // CHANGE DISH NAME BELOW
+                name: "Fettuccine Alfredo", 
+                price: 18, 
+                category: "main", 
+                desc: "Classic Italian pasta tossed in a rich and creamy parmesan cheese sauce with grilled chicken.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1645112411341-6c4fd023714a?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 20, 
+                // CHANGE DISH NAME BELOW
+                name: "Chicken Manchurian", 
+                price: 16, 
+                category: "main", 
+                desc: "Indo-Chinese favorite featuring fried chicken cubes in a spicy, tangy tomato glaze, served with egg fried rice.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 21, 
+                // CHANGE DISH NAME BELOW
+                name: "Chicken Chow Mein", 
+                price: 14, 
+                category: "main", 
+                desc: "Stir-fried noodles with chicken strips, julienne vegetables, and savory soy sauce.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 22, 
+                // CHANGE DISH NAME BELOW
+                name: "Club Sandwich", 
+                price: 10, 
+                category: "starter", 
+                desc: "Triple-decker sandwich with roasted chicken, egg, cheese, lettuce, and tomato.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 23, 
+                // CHANGE DISH NAME BELOW
+                name: "Daal Mash (Fry)", 
+                price: 12, 
+                category: "main", 
+                desc: "Lentils cooked with butter, garlic, ginger, and green chilies, garnished with cilantro.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 24, 
+                // CHANGE DISH NAME BELOW
+                name: "Mixed Sabzi", 
+                price: 14, 
+                category: "main", 
+                desc: "Fresh seasonal vegetables stir-fried with traditional spices for a healthy, home-style taste.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1606491956689-2ea28c67a19a?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 25, 
+                // CHANGE DISH NAME BELOW
+                name: "Beef Keema", 
+                price: 18, 
+                category: "main", 
+                desc: "Spicy minced beef fry cooked with onions, tomatoes, and aromatic whole spices.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 26, 
+                // CHANGE DISH NAME BELOW
+                name: "Chicken White Karahi", 
+                price: 26, 
+                category: "main", 
+                desc: "Creamy and mild chicken curry cooked with yogurt, cream, white pepper, and green chilies.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1606756790138-7cc4d8380e72?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 27, 
+                // CHANGE DISH NAME BELOW
+                name: "Karhi Pakora", 
+                price: 13, 
+                category: "main", 
+                desc: "Tangy yogurt-based curry with gram flour dumplings, tempered with curry leaves and red chilies.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1626509684558-19d169798c2c?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 28, 
+                // CHANGE DISH NAME BELOW
+                name: "Halwa Puri Platter", 
+                price: 12, 
+                category: "main", 
+                desc: "Traditional breakfast featuring fluffy puris, sweet semolina halwa, and chickpea curry.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1626132647523-66f5bf380027?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 29, 
+                // CHANGE DISH NAME BELOW
+                name: "Mutton Paya", 
+                price: 22, 
+                category: "main", 
+                desc: "Traditional slow-cooked trotters stew, rich in gelatin and served with hot naan.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1606756262272-a07994320216?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 30, 
+                // CHANGE DISH NAME BELOW
+                name: "Special Doodh Patti", 
+                price: 4, 
+                category: "drink", 
+                desc: "Strong, creamy tea brewed with milk and cardamom, the heart of Pakistani culture.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1576092768241-dec231845f33?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 31, 
+                // CHANGE DISH NAME BELOW
+                name: "Punjabi Lassi", 
+                price: 6, 
+                category: "drink", 
+                desc: "Refreshing traditional yogurt drink, served sweet or salty in a large clay glass.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 32, 
+                // CHANGE DISH NAME BELOW
+                name: "Mango Lassi", 
+                price: 7, 
+                category: "drink", 
+                desc: "A chilled, sweet blend of yogurt and fresh seasonal mangoes.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1628557044797-121a37a91253?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 33, 
+                // CHANGE DISH NAME BELOW
+                name: "Fresh Sugarcane Juice", 
+                price: 5, 
+                category: "drink", 
+                desc: "Freshly pressed sugarcane juice (Gannay ka ras) served with a hint of lemon and mint.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 34, 
+                // CHANGE DISH NAME BELOW
+                name: "Limopani", 
+                price: 4, 
+                category: "drink", 
+                desc: "Thirst-quenching fresh lime water served chilled with ice.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 35, 
+                // CHANGE DISH NAME BELOW
+                name: "Cold Drink", 
+                price: 3, 
+                category: "drink", 
+                desc: "Chilled soft drinks (Coke, Sprite, Fanta) to pair with your meal.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1622483767128-3f66f32aef97?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 36, 
+                // CHANGE DISH NAME BELOW
+                name: "Kashmiri Chai", 
+                price: 5, 
+                category: "drink", 
+                desc: "Traditional pink tea cooked with milk, topped with crushed pistachios and almonds.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1596716075677-1c64eb372a8c?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 37, 
+                // CHANGE DISH NAME BELOW
+                name: "Peshawari Kahwa", 
+                price: 3, 
+                category: "drink", 
+                desc: "Aromatic green tea infused with cardamom, served with lemon and gur (jaggery).", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 38, 
+                // CHANGE DISH NAME BELOW
+                name: "Cappuccino", 
+                price: 6, 
+                category: "drink", 
+                desc: "Rich espresso with steamed milk foam, perfect for coffee lovers.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 39, 
+                // CHANGE DISH NAME BELOW
+                name: "Chocolate Milkshake", 
+                price: 8, 
+                category: "drink", 
+                desc: "Thick and creamy blend of milk, cocoa, and chocolate ice cream.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 40, 
+                // CHANGE DISH NAME BELOW
+                name: "Oreo Shake", 
+                price: 9, 
+                category: "drink", 
+                desc: "Delicious milkshake blended with crushed Oreo cookies and vanilla cream.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 41, 
+                // CHANGE DISH NAME BELOW
+                name: "Fresh Orange Juice", 
+                price: 7, 
+                category: "drink", 
+                desc: "100% pure squeezed oranges, served chilled for a vitamin boost.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=800&q=80" 
+            },
+            { 
+                id: 42, 
+                // CHANGE DISH NAME BELOW
+                name: "Mint Margarita", 
+                price: 6, 
+                category: "drink", 
+                desc: "Refreshing blend of fresh mint, lemon, soda, and ice.", 
+                // CHANGE IMAGE URL BELOW
+                img: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80" 
+            }
+        ];
+
+        // --- Helper Components ---
+        const PageHeader = ({ title, subtitle }) => (
+            <div className="bg-brand-dark text-white py-20 text-center">
+                <div className="container">
+                    <h3 className="text-brand-gold font-bold uppercase tracking-widest text-sm mb-2">{subtitle}</h3>
+                    <h1 className="display-4 font-serif font-bold">{title}</h1>
+                </div>
+            </div>
+        );
+
+        // --- Page Components ---
+
+        const Navbar = ({ currentPage, setPage, cartCount }) => {
+            const [scrolled, setScrolled] = useState(false);
+            const [isOpen, setIsOpen] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const navClass = scrolled || currentPage !== 'home' 
+                ? 'bg-brand-dark shadow-lg py-2' 
+                : 'bg-transparent py-4';
+
+            return (
+                <nav className={`fixed w-full z-50 transition-all duration-300 ${navClass}`}>
+                    <div className="container d-flex justify-content-between align-items-center">
+                        {/* Logo with Urdu Script ONLY - Reduced Size */}
+                        <div onClick={() => setPage('home')} className="cursor-pointer flex items-center no-underline">
+                            <span className="text-3xl font-urdu-custom text-brand-gold font-bold drop-shadow-md">
+                                <i className="fas fa-mug-hot mr-3 text-2xl"></i>
+                                چائے چپاتی
+                            </span>
+                        </div>
+
+                        {/* Desktop Menu */}
+                        <div className="hidden md:flex gap-6 items-center">
+                            {['Home', 'Menu', 'Reservation'].map(item => {
+                                const pageKey = item.toLowerCase();
+                                return (
+                                    <div 
+                                        key={item} 
+                                        onClick={() => setPage(pageKey)}
+                                        className={`nav-link-custom text-white font-bold text-sm tracking-wide ${currentPage === pageKey ? 'text-brand-gold' : ''}`}
+                                    >
+                                        {item.toUpperCase()}
+                                    </div>
+                                );
+                            })}
+                            
+                            {/* Cart Button */}
+                            <button 
+                                onClick={() => setPage('order')} 
+                                className="btn btn-brand rounded-pill px-4 position-relative"
+                            >
+                                <i className="fas fa-shopping-bag me-2"></i> Order Online
+                                {cartCount > 0 && (
+                                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-red-600 animate-pop">
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+
+                        {/* Mobile Toggle */}
+                        <button className="md:hidden text-white text-2xl" onClick={() => setIsOpen(!isOpen)}>
+                            <i className={`fas ${isOpen ? 'fa-times' : 'fa-bars'}`}></i>
+                        </button>
+                    </div>
+
+                    {/* Mobile Menu */}
+                    {isOpen && (
+                        <div className="md:hidden bg-brand-dark absolute w-full left-0 top-full shadow-lg border-t border-gray-800">
+                            <div className="flex flex-col p-4 text-center gap-4">
+                                {['Home', 'Menu', 'Reservation', 'Order'].map(item => (
+                                    <div 
+                                        key={item} 
+                                        onClick={() => { setPage(item.toLowerCase()); setIsOpen(false); }}
+                                        className="text-white font-bold hover:text-brand-gold cursor-pointer"
+                                    >
+                                        {item.toUpperCase()}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </nav>
+            );
+        };
+
+        const Home = ({ setPage }) => (
+            <React.Fragment>
+                <header className="hero-bg vh-100 d-flex align-items-center justify-content-center text-center text-white">
+                    <div className="container">
+                        <div className="row justify-content-center">
+                            {/* Added mt-20 to push content down and prevent overlap with navbar */}
+                            <div className="col-lg-8 animate-fade-in-up mt-20">
+                                {/* Reduced Heading Size */}
+                                <h1 className="text-4xl md:text-5xl font-bold mb-4">Taste the Soul of <br/> Pakistan</h1>
+                                
+                                {/* New Free Home Delivery Badge - Now Clickable */}
+                                <button 
+                                    onClick={() => setPage('order')}
+                                    className="inline-block bg-brand-gold text-brand-dark px-4 py-1 rounded-full font-bold uppercase text-sm tracking-wider mb-5 hover:bg-white hover:scale-105 transition-all duration-300 shadow-lg cursor-pointer border-none"
+                                >
+                                    <i className="fas fa-motorcycle me-2"></i> Free Home Delivery
+                                </button>
+
+                                {/* Added "Experience the extraordinary" here */}
+                                <p className="text-brand-gold font-serif text-xl mb-3 italic">Experience the extraordinary</p>
+                                <p className="lead mb-5 text-gray-200">Authentic flavors, traditional recipes, and an ambiance that feels like home.</p>
+                                <div className="d-flex justify-content-center gap-3">
+                                    {/* Changed View Menu to Order Now and made it primary */}
+                                    <button onClick={() => setPage('menu')} className="btn btn-brand btn-lg rounded-0 px-5 fw-bold">Order Now</button>
+                                    <button onClick={() => setPage('reservation')} className="btn btn-outline-light btn-lg rounded-0 px-5">Book Table</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                
+                {/* Mini Features Section */}
+                <section className="py-20 bg-white">
+                    <div className="container">
+                        <div className="row text-center g-4">
+                            <div className="col-md-4">
+                                <i className="fas fa-utensils text-4xl text-brand-gold mb-3"></i>
+                                <h3 className="fw-bold">Authentic Recipes</h3>
+                                <p className="text-muted">Dishes prepared with traditional spices and techniques.</p>
+                            </div>
+                            <div className="col-md-4">
+                                <i className="fas fa-mug-hot text-4xl text-brand-gold mb-3"></i>
+                                <h3 className="fw-bold">Signature Chai</h3>
+                                <p className="text-muted">Brewed to perfection, our chai is the heart of our menu.</p>
+                            </div>
+                            <div className="col-md-4">
+                                <i className="fas fa-truck text-4xl text-brand-gold mb-3"></i>
+                                {/* Updated to Free Home Delivery */}
+                                <h3 className="fw-bold">Free Home Delivery</h3>
+                                <p className="text-muted">Hot and fresh food delivered right to your doorstep at no extra cost.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </React.Fragment>
+        );
+
+        const Menu = ({ onAddToCart }) => {
+            const [filter, setFilter] = useState('all');
+
+            const filteredItems = filter === 'all' 
+                ? MENU_ITEMS 
+                : MENU_ITEMS.filter(item => item.category === filter);
+
+            return (
+                <div className="animate-fade-in">
+                    <PageHeader title="Our Signature Menu" subtitle="Discover" />
+                    
+                    <section className="py-16 container">
+                        {/* Filters */}
+                        <div className="d-flex justify-content-center gap-2 mb-5 flex-wrap">
+                            {['all', 'main', 'starter', 'drink'].map(cat => (
+                                <button 
+                                    key={cat}
+                                    onClick={() => setFilter(cat)}
+                                    className={`btn ${filter === cat ? 'btn-brand' : 'btn-outline-dark'} rounded-pill text-capitalize px-4`}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Grid */}
+                        <div className="row g-4">
+                            {filteredItems.map(item => (
+                                <div key={item.id} className="col-md-6 col-lg-4">
+                                    <div className="card h-100 border-0 shadow-sm menu-card overflow-hidden">
+                                        <div className="h-64 overflow-hidden relative group">
+                                            <img 
+                                                src={item.img} 
+                                                alt={item.name} 
+                                                className="card-img-top h-100 w-100 object-cover"
+                                                onError={(e) => {
+                                                    e.target.onerror = null; 
+                                                    e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80";
+                                                }}
+                                            />
+                                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                <button onClick={() => onAddToCart(item)} className="btn btn-brand rounded-pill px-4">Add to Cart</button>
+                                            </div>
+                                        </div>
+                                        <div className="card-body p-4">
+                                            <div className="d-flex justify-content-between align-items-center mb-2">
+                                                <h5 className="card-title font-bold text-xl mb-0">{item.name}</h5>
+                                                <span className="text-brand-gold font-bold text-xl">${item.price}</span>
+                                            </div>
+                                            <p className="card-text text-gray-500 mb-4">{item.desc}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                </div>
+            );
+        };
+
+        const Reservation = ({ onSubmit }) => (
+            <div className="animate-fade-in bg-gray-50 min-vh-100">
+                <PageHeader title="Book A Table" subtitle="Reservations" />
+                <section className="py-16 container">
+                    <div className="row justify-content-center">
+                        <div className="col-lg-8">
+                            <div className="bg-white p-5 rounded shadow-lg border-t-4 border-brand-gold">
+                                <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }}>
+                                    <div className="row g-4">
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold">Name</label>
+                                            <input type="text" className="form-control bg-gray-50 border-0 py-3" required placeholder="John Doe" />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold">Phone</label>
+                                            <input type="tel" className="form-control bg-gray-50 border-0 py-3" required placeholder="(555) 123-4567" />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold">Date</label>
+                                            <input type="date" className="form-control bg-gray-50 border-0 py-3" required />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold">Time</label>
+                                            <input type="time" className="form-control bg-gray-50 border-0 py-3" required />
+                                        </div>
+                                        <div className="col-md-12">
+                                            <label className="form-label fw-bold">Special Requests</label>
+                                            <textarea className="form-control bg-gray-50 border-0 py-3" rows="3"></textarea>
+                                        </div>
+                                        <div className="col-12 mt-4">
+                                            <button type="submit" className="btn btn-brand w-100 py-3 fw-bold text-uppercase">
+                                                Confirm Reservation
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        );
+
+        // NEW: Delivery Tracking Component
+        const DeliveryTracking = ({ onBackHome }) => {
+            const [step, setStep] = useState(1);
+
+            useEffect(() => {
+                // Simulate order updates
+                const timers = [
+                    setTimeout(() => setStep(2), 2500), // Preparing
+                    setTimeout(() => setStep(3), 6000), // On the way
+                    setTimeout(() => setStep(4), 10000), // Delivered
+                ];
+                return () => timers.forEach(clearTimeout);
+            }, []);
+
+            const steps = [
+                { id: 1, icon: 'fa-clipboard-check', label: 'Confirmed' },
+                { id: 2, icon: 'fa-fire', label: 'Cooking' },
+                { id: 3, icon: 'fa-motorcycle', label: 'On Way' },
+                { id: 4, icon: 'fa-smile-beam', label: 'Delivered' }
+            ];
+
+            return (
+                <div className="animate-fade-in min-vh-100 bg-gray-50">
+                    <PageHeader title="Track Order" subtitle="Delivery Status" />
+                    <div className="container py-20">
+                        <div className="max-w-3xl mx-auto bg-white p-8 rounded shadow-lg border-t-4 border-brand-gold">
+                            
+                            {/* Tracker Visual */}
+                            <div className="position-relative mb-16 px-4">
+                                {/* Bar Background */}
+                                <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded"></div>
+                                {/* Active Bar */}
+                                <div className="absolute top-1/2 left-0 h-1 bg-brand-gold -z-10 -translate-y-1/2 rounded transition-all duration-1000 ease-linear" 
+                                     style={{width: `${((step - 1) / 3) * 100}%`}}></div>
+                                
+                                <div className="d-flex justify-content-between position-relative z-10">
+                                    {steps.map((s) => (
+                                        <div key={s.id} className="text-center">
+                                            <div className={`rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm border-4 transition-all duration-500
+                                                ${step >= s.id ? 'bg-brand-gold text-brand-dark border-brand-gold scale-110' : 'bg-white text-gray-300 border-gray-200'}`} 
+                                                style={{width: '60px', height: '60px', fontSize: '1.25rem'}}>
+                                                <i className={`fas ${s.icon}`}></i>
+                                            </div>
+                                            <div className={`text-sm font-bold uppercase tracking-wider transition-colors duration-300 ${step >= s.id ? 'text-brand-dark' : 'text-gray-300'}`}>
+                                                {s.label}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Status Text Animation */}
+                            <div className="text-center mt-12 bg-gray-50 p-6 rounded border border-gray-100">
+                                {step === 1 && <h3 className="text-2xl font-bold animate-pulse text-gray-700">Order Received! Sending to kitchen...</h3>}
+                                {step === 2 && <h3 className="text-2xl font-bold animate-pulse text-orange-600">Kitchen is firing up the grill! 🔥</h3>}
+                                {step === 3 && <h3 className="text-2xl font-bold animate-pulse text-blue-600">Driver is speeding to you! 🏍️</h3>}
+                                {step === 4 && (
+                                    <div className="animate-bounce">
+                                        <h3 className="text-2xl font-bold text-green-600 mb-2">Order Delivered!</h3>
+                                        <p className="text-gray-500">Bon Appétit! We hope you enjoy your meal.</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Info */}
+                            <div className="mt-8 border-t pt-8">
+                                <div className="row g-4 text-center">
+                                    <div className="col-4 border-end">
+                                        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Estimated Time</p>
+                                        <p className="font-bold text-lg">35 Mins</p>
+                                    </div>
+                                    <div className="col-4 border-end">
+                                        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Order Number</p>
+                                        <p className="font-bold text-lg">#8291</p>
+                                    </div>
+                                    <div className="col-4">
+                                        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Items</p>
+                                        <p className="font-bold text-lg">3 Items</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {step === 4 && (
+                                <div className="mt-8 text-center">
+                                    <button onClick={onBackHome} className="btn btn-brand px-5 py-3 rounded-pill fw-bold shadow-sm hover:shadow-lg transition-all">
+                                        Back to Menu
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Order = ({ cart, removeFromCart, updateQty, onPlaceOrder, onGoToMenu }) => {
+            const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+            const deliveryFee = 5;
+            const total = subtotal + deliveryFee;
+
+            if (cart.length === 0) {
+                return (
+                    <div className="animate-fade-in min-vh-100 bg-gray-50">
+                        <PageHeader title="Your Cart" subtitle="Order Online" />
+                        <div className="container py-20 text-center">
+                            <i className="fas fa-shopping-basket text-6xl text-gray-300 mb-4"></i>
+                            <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
+                            <p className="text-gray-500 mb-6">Looks like you haven't added any delicious food yet.</p>
+                            <a href="#" className="btn btn-brand px-5" onClick={(e) => { e.preventDefault(); onGoToMenu(); }}>Go to Menu</a>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="animate-fade-in bg-gray-50 min-vh-100">
+                    <PageHeader title="Checkout" subtitle="Order Online" />
+                    <section className="py-16 container">
+                        <div className="row g-5">
+                            {/* Left: Cart Items */}
+                            <div className="col-lg-7">
+                                <div className="bg-white p-4 rounded shadow-sm mb-4">
+                                    <h4 className="border-b pb-3 mb-4 font-bold">Order Summary</h4>
+                                    {cart.map(item => (
+                                        <div key={item.uniqueId} className="d-flex align-items-center justify-content-between mb-4 pb-4 border-b last:border-0 last:pb-0">
+                                            <div className="d-flex align-items-center gap-3">
+                                                <img 
+                                                    src={item.img} 
+                                                    className="w-20 h-20 rounded object-cover" 
+                                                    alt={item.name}
+                                                    onError={(e) => {
+                                                        e.target.onerror = null; 
+                                                        e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80";
+                                                    }}
+                                                />
+                                                <div>
+                                                    <h6 className="font-bold mb-1">{item.name}</h6>
+                                                    <p className="text-brand-gold font-bold">${item.price}</p>
+                                                </div>
+                                            </div>
+                                            <div className="d-flex align-items-center gap-3">
+                                                <div className="btn-group border rounded">
+                                                    <button onClick={() => updateQty(item.uniqueId, -1)} className="btn btn-sm btn-light px-2">-</button>
+                                                    <span className="btn btn-sm btn-light disabled fw-bold px-3">{item.qty}</span>
+                                                    <button onClick={() => updateQty(item.uniqueId, 1)} className="btn btn-sm btn-light px-2">+</button>
+                                                </div>
+                                                <button onClick={() => removeFromCart(item.uniqueId)} className="btn btn-sm text-red-500 hover:bg-red-50">
+                                                    <i className="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Right: Checkout Form */}
+                            <div className="col-lg-5">
+                                <div className="bg-white p-4 rounded shadow-lg border-t-4 border-brand-gold">
+                                    <h4 className="mb-4 font-bold">Delivery Details</h4>
+                                    <form onSubmit={(e) => { e.preventDefault(); onPlaceOrder(); }}>
+                                        <div className="mb-3">
+                                            <label className="form-label text-sm fw-bold">Full Name</label>
+                                            <input type="text" className="form-control" required />
+                                        </div>
+                                        <div className="mb-3">
+                                            <label className="form-label text-sm fw-bold">Address</label>
+                                            <input type="text" className="form-control" required placeholder="123 Street Name" />
+                                        </div>
+                                        <div className="mb-4">
+                                            <label className="form-label text-sm fw-bold">Payment Method</label>
+                                            <select className="form-select">
+                                                <option>Cash on Delivery</option>
+                                                <option>Credit Card (Mock)</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="border-t pt-3 mt-3">
+                                            <div className="d-flex justify-content-between mb-2">
+                                                <span className="text-muted">Subtotal</span>
+                                                <span className="fw-bold">${subtotal.toFixed(2)}</span>
+                                            </div>
+                                            <div className="d-flex justify-content-between mb-3">
+                                                <span className="text-muted">Delivery Fee</span>
+                                                <span className="fw-bold">${deliveryFee.toFixed(2)}</span>
+                                            </div>
+                                            <div className="d-flex justify-content-between mb-4 text-xl font-bold text-brand-dark">
+                                                <span>Total</span>
+                                                <span>${total.toFixed(2)}</span>
+                                            </div>
+                                            <button type="submit" className="btn btn-brand w-100 py-3 fw-bold shadow-sm">
+                                                PLACE ORDER
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            );
+        };
+
+        const Footer = () => (
+            <footer className="bg-brand-dark text-white py-12 border-t border-gray-800">
+                <div className="container">
+                    <div className="row gy-4">
+                        <div className="col-md-4">
+                            <div className="flex flex-col mb-4">
+                                {/* Only Urdu Logo in Footer */}
+                                <h3 className="text-3xl font-urdu-custom text-brand-gold font-bold">چائے چپاتی</h3>
+                            </div>
+                            <p className="text-gray-400 small leading-relaxed">
+                                Serving authentic Pakistani flavors and tradition since 1995.
+                            </p>
+                        </div>
+                        <div className="col-md-4">
+                            <h5 className="font-bold mb-4">Quick Links</h5>
+                            <div className="d-flex flex-column gap-2 text-gray-400">
+                                <a href="#" className="hover:text-brand-gold text-decoration-none">About Us</a>
+                                <a href="#" className="hover:text-brand-gold text-decoration-none">Privacy Policy</a>
+                                <a href="#" className="hover:text-brand-gold text-decoration-none">Terms of Service</a>
+                            </div>
+                        </div>
+                        <div className="col-md-4">
+                            <h5 className="font-bold mb-4">Contact</h5>
+                            <p className="text-gray-400 mb-2"><i className="fas fa-map-marker-alt text-brand-gold w-6"></i> 123 Culinary Ave, NY</p>
+                            <p className="text-gray-400"><i className="fas fa-phone text-brand-gold w-6"></i> (555) 123-4567</p>
+                        </div>
+                    </div>
+                    <div className="text-center mt-5 pt-4 border-t border-gray-800 text-gray-500 small">
+                        &copy; {new Date().getFullYear()} Chai & Chapati. All rights reserved.
+                    </div>
+                </div>
+            </footer>
+        );
+
+        // --- Main App Logic ---
+
+        const App = () => {
+            const [page, setPage] = useState('home');
+            const [cart, setCart] = useState([]);
+            const [toast, setToast] = useState({ show: false, msg: '' });
+
+            // Toast Logic
+            const showToast = (msg) => {
+                setToast({ show: true, msg });
+                setTimeout(() => setToast({ ...toast, show: false }), 3000);
+            };
+
+            // Cart Logic
+            const addToCart = (item) => {
+                setCart(prev => {
+                    const existing = prev.find(i => i.id === item.id);
+                    if (existing) {
+                        return prev.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i);
+                    }
+                    return [...prev, { ...item, qty: 1, uniqueId: Date.now() }];
+                });
+                showToast(`${item.name} added to cart!`);
+            };
+
+            const removeFromCart = (uniqueId) => {
+                setCart(prev => prev.filter(item => item.uniqueId !== uniqueId));
+            };
+
+            const updateQty = (uniqueId, change) => {
+                setCart(prev => prev.map(item => {
+                    if (item.uniqueId === uniqueId) {
+                        const newQty = item.qty + change;
+                        return newQty > 0 ? { ...item, qty: newQty } : item;
+                    }
+                    return item;
+                }));
+            };
+
+            const handlePlaceOrder = () => {
+                showToast("Order Placed Successfully!");
+                setCart([]); // Clear cart
+                setPage('delivery'); // Switch to delivery tracking view
+            };
+
+            const handleReservation = () => {
+                showToast("Table Reserved! Confirmation sent to email.");
+                setTimeout(() => setPage('home'), 2000);
+            };
+
+            // Render current page
+            const renderPage = () => {
+                switch(page) {
+                    case 'home': return <Home setPage={setPage} />;
+                    case 'menu': return <Menu onAddToCart={addToCart} />;
+                    case 'reservation': return <Reservation onSubmit={handleReservation} />;
+                    case 'order': return <Order cart={cart} removeFromCart={removeFromCart} updateQty={updateQty} onPlaceOrder={handlePlaceOrder} onGoToMenu={() => setPage('menu')} />;
+                    case 'delivery': return <DeliveryTracking onBackHome={() => setPage('home')} />;
+                    default: return <Home setPage={setPage} />;
+                }
+            };
+
+            return (
+                <div className="flex flex-col min-h-screen">
+                    <Navbar currentPage={page} setPage={setPage} cartCount={cart.reduce((a,b) => a + b.qty, 0)} />
+                    
+                    {/* Main Content Area */}
+                    <main className="flex-grow">
+                        {renderPage()}
+                    </main>
+
+                    <Footer />
+
+                    {/* Toast Notification */}
+                    <div className={`fixed bottom-5 right-5 bg-brand-dark text-white px-6 py-4 rounded shadow-lg transform transition-transform duration-300 z-50 border-l-4 border-brand-gold flex items-center gap-3 ${toast.show ? 'translate-x-0' : 'translate-x-full'}`}>
+                        <i className="fas fa-check-circle text-brand-gold"></i>
+                        <span>{toast.msg}</span>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
